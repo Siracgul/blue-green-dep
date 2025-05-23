@@ -1,0 +1,37 @@
+name: Deploy to GREEN
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Decode SSH Key
+      run: |
+        echo "${{ secrets.SSH_KEY }}" | base64 -d > bl-gr-key.pem
+        chmod 400 bl-gr-key.pem
+
+    - name: SSH into Green and Deploy
+  run: |
+    ssh -o StrictHostKeyChecking=no -i bl-gr-key.pem ubuntu@13.49.240.8 '
+    docker rm -f app || true
+    docker rmi app-image || true
+    mkdir -p app &&
+    cd app &&
+    rm -rf * &&
+    echo "<h1>GREEN VERSION</h1>" > index.html &&
+    cat <<EOF > Dockerfile
+    FROM nginx:alpine
+    COPY index.html /usr/share/nginx/html/index.html
+    EOF
+    docker build -t app-image . &&
+    docker run -d -p 80:80 --name app app-image
+    '
+
