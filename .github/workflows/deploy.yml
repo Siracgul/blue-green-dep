@@ -18,20 +18,30 @@ jobs:
         echo "${{ secrets.SSH_KEY }}" | base64 -d > bl-gr-key.pem
         chmod 400 bl-gr-key.pem
 
-    - name: SSH into Green and Deploy
+    - name: Clean GREEN Environment
       run: |
         ssh -o StrictHostKeyChecking=no -i bl-gr-key.pem ubuntu@13.49.240.8 '
-        docker rm -f app || true
-        docker rmi app-image || true
-        mkdir -p app &&
-        cd app &&
-        rm -rf * &&
-        cat <<EOF > Dockerfile
-        FROM nginx:alpine
-        COPY index.html /usr/share/nginx/html/index.html
-        EOF
-        docker build -t app-image . &&
-        docker run -d -p 80:80 --name app app-image
+          docker rm -f app || true
+          docker rmi app-image || true
+          mkdir -p app &&
+          cd app &&
+          rm -rf *
+        '
+
+    - name: Send index.html to GREEN
+      run: |
+        scp -o StrictHostKeyChecking=no -i bl-gr-key.pem index.html ubuntu@13.49.240.8:/home/ubuntu/app/index.html
+
+    - name: Build and Run Docker in GREEN
+      run: |
+        ssh -o StrictHostKeyChecking=no -i bl-gr-key.pem ubuntu@13.49.240.8 '
+          cd app &&
+          cat <<EOF > Dockerfile
+          FROM nginx:alpine
+          COPY index.html /usr/share/nginx/html/index.html
+          EOF
+          docker build -t app-image . &&
+          docker run -d -p 80:80 --name app app-image
         '
 
     - name: Switch reverse proxy to GREEN
