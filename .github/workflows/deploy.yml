@@ -26,7 +26,6 @@ jobs:
         mkdir -p app &&
         cd app &&
         rm -rf * &&
-        echo "<h1>GREEN VERSION</h1>" > index.html &&
         cat <<EOF > Dockerfile
         FROM nginx:alpine
         COPY index.html /usr/share/nginx/html/index.html
