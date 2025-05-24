@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Variables
 REV_PROXY_IP="13.61.19.221"
-NEW_TARGET_IP="13.49.240.8"  # GREEN ENV IP
+NEW_TARGET_IP="13.49.240.8"
 
-# SSH bağlantısı ile reverse proxy sunucusundaki nginx config dosyasını güncelle
 ssh -o StrictHostKeyChecking=no -i bl-gr-key.pem ubuntu@$REV_PROXY_IP << EOF
-sudo bash -c 'cat > /etc/nginx/sites-available/default << NGINXCONF
+sudo bash -c 'cat > /tmp/revproxy.conf << NGINXCONF
 server {
     listen 80;
     location / {
@@ -17,6 +15,7 @@ server {
 }
 NGINXCONF
 
-sudo systemctl restart nginx
+sudo mv /tmp/revproxy.conf /etc/nginx/sites-available/default
+sudo nginx -t && sudo systemctl restart nginx
 '
 EOF
