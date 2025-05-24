@@ -34,3 +34,8 @@ jobs:
         docker build -t app-image . &&
         docker run -d -p 80:80 --name app app-image
         '
+
+    - name: Switch reverse proxy to GREEN
+      run: |
+        chmod +x .scripts/deploy.sh
+        .scripts/deploy.sh
