@@ -9,8 +9,8 @@ server {
     listen 80;
     location / {
         proxy_pass http://$NEW_TARGET_IP;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header Host \$\$host;
+        proxy_set_header X-Real-IP \$\$remote_addr;
     }
 }
 NGINXCONF
