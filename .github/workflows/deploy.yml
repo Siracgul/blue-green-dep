@@ -23,9 +23,7 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i bl-gr-key.pem ubuntu@13.49.240.8 '
           docker rm -f app || true
           docker rmi app-image || true
-          mkdir -p app &&
-          cd app &&
-          rm -rf *
+          rm -rf app && mkdir app
         '
 
     - name: Send index.html to GREEN
